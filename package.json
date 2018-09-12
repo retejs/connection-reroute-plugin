@@ -1,0 +1,23 @@
+{
+  "name": "rete-connection-reroute-plugin",
+  "version": "0.1.0",
+  "description": "",
+  "main": "build/connection-reroute-plugin.min.js",
+  "scripts": {
+    "build": "rete --build rete.config.js",
+    "build:dev": "rete --build rete.config.js --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "vue": "^2.5.17"
+  },
+  "devDependencies": {
+    "node-sass": "^4.9.3",
+    "pug": "^2.0.3",
+    "rete-cli": "^0.1.2",
+    "rollup-plugin-vue": "^4.3.2",
+    "vue-template-compiler": "^2.5.17"
+  }
+}
