@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import * as ConnectionPlugin from 'rete-connection-plugin';
 import Pins from './Pins.vue';
 
 function install(editor, params) {
