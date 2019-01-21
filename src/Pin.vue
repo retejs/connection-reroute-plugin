@@ -2,7 +2,9 @@
 .pin(
   :style="{left: pin.x+'px', top: pin.y+'px'}"
   @mousedown="down"
+  @touchstart="down"
   @mouseup="pinup"
+  @touchend="pinup"
 )
 </template>
 
@@ -19,8 +21,16 @@ export default {
     }
   },
   mounted() {
-    window.addEventListener('mousemove', this.move.bind(this));
-    window.addEventListener('mouseup', this.up.bind(this));
+    window.addEventListener('mousemove', this.move);
+    window.addEventListener('touchmove', this.move);
+    window.addEventListener('mouseup', this.up);
+    window.addEventListener('touchend', this.up);
+  },
+  destroyed() {
+    window.removeEventListener('mousemove', this.move);
+    window.removeEventListener('touchmove', this.move);
+    window.removeEventListener('mouseup', this.up);
+    window.removeEventListener('touchend', this.up);
   },
   methods: {
     setPosition(x, y) {
@@ -33,10 +43,9 @@ export default {
     },
     move(e){
       if(this.state === State.DROPED) return;
-    
+
       this.state = State.MOVED;
 
-      e.preventDefault();
       e.stopPropagation();
 
       const { mouse } = this.editor.view.area;

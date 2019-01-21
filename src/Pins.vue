@@ -1,6 +1,10 @@
 <template lang="pug">
 div
-  Pin(v-for="pin in pins" :pin="pin", @change="change(pin, $event)", @remove="remove(pin)" :key="pin.x + ' ' + pin.y")
+  Pin(v-for="pin in pins" :pin="pin"
+    @change="change(pin, $event)"
+    @remove="remove(pin)"
+    :key="pin.x + ' ' + pin.y"
+  )
 </template>
 
 
@@ -18,7 +22,6 @@ export default {
     },
     remove(pin) {
       this.pins.splice(this.pins.indexOf(pin), 1);
-      console.log(this.pins)
       this.editor.view.connections.get(this.connection).update();
       this.$forceUpdate();
     }
