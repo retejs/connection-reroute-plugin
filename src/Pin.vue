@@ -1,10 +1,8 @@
 <template lang="pug">
 .pin(
   :style="{left: pin.x+'px', top: pin.y+'px'}"
-  @mousedown="down"
-  @touchstart="down"
-  @mouseup="pinup"
-  @touchend="pinup"
+  @pointerdown="down"
+  @pointerup="pinup"
 )
 </template>
 
@@ -21,16 +19,12 @@ export default {
     }
   },
   mounted() {
-    window.addEventListener('mousemove', this.move);
-    window.addEventListener('touchmove', this.move);
-    window.addEventListener('mouseup', this.up);
-    window.addEventListener('touchend', this.up);
+    window.addEventListener('pointermove', this.move);
+    window.addEventListener('pointerup', this.up);
   },
   destroyed() {
-    window.removeEventListener('mousemove', this.move);
-    window.removeEventListener('touchmove', this.move);
-    window.removeEventListener('mouseup', this.up);
-    window.removeEventListener('touchend', this.up);
+    window.removeEventListener('pointermove', this.move);
+    window.removeEventListener('pointerup', this.up);
   },
   methods: {
     setPosition(x, y) {
@@ -45,8 +39,7 @@ export default {
       if(this.state === State.DROPED) return;
 
       this.state = State.MOVED;
-
-      e.stopPropagation();
+      e.preventDefault();
 
       const { mouse } = this.editor.view.area;
 

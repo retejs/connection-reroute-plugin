@@ -11,7 +11,8 @@ function install(editor, params) {
         const p = [[x1, y1], ...pins.map(p => [p.x, p.y]), [x2, y2]];
 
         let d = '';
-        for(var i = 1; i < p.length; i++)
+
+        for (var i = 1; i < p.length; i++)
             d += ' '+ConnectionPlugin.defaultPath([...p[i - 1], ...p[i]], 0.4)
 
         data.d = d;
@@ -21,7 +22,7 @@ function install(editor, params) {
         const path = el.querySelector('.connection path');
         const pins = connection.data.pins || (connection.data.pins = []);
 
-        if(!path) throw new Error("<path> not found");
+        if (!path) throw new Error('<path> not found');
 
         path.addEventListener('click', () => {
             const { mouse } = editor.view.area;
@@ -33,15 +34,15 @@ function install(editor, params) {
         });
 
         const vueContainer = document.createElement('div');
-        el.appendChild(vueContainer);
 
+        el.appendChild(vueContainer);
    
         const app = new Vue({
             provide: {
                 editor,
                 connection
             },
-            render: h => h(Pins, { props: { pins }})
+            render: h => h(Pins, { props: { pins } })
         }).$mount(vueContainer)
     })
 }
