@@ -9,8 +9,12 @@
     "build:dev": "rete --build rete.config.js --watch",
     "prepublishOnly": "npm run build"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Vitaliy Stoliarov",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/retejs/connection-reroute-plugin.git"
+  },
   "dependencies": {
     "rete-connection-plugin": "^0.3.2",
     "vue": "^2.5.17"
