@@ -16,14 +16,15 @@
     "url": "https://github.com/retejs/connection-reroute-plugin.git"
   },
   "dependencies": {
-    "rete-connection-plugin": "^0.3.2",
-    "vue": "^2.5.17"
+    "rete-connection-plugin": "0.7.0",
+    "vue": "2.6.10"
   },
   "devDependencies": {
     "node-sass": "^4.9.3",
     "pug": "^2.0.3",
     "rete-cli": "^0.5.0",
-    "rollup-plugin-vue": "^4.3.2",
-    "vue-template-compiler": "^2.5.17"
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-vue": "4.7.2",
+    "vue-template-compiler": "2.6.10"
   }
 }

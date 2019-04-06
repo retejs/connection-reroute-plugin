@@ -1,3 +1,4 @@
+import commonjs from 'rollup-plugin-commonjs';
 import vue from 'rollup-plugin-vue';
 
 export default {
@@ -8,6 +9,7 @@ export default {
         'rete-connection-plugin': 'ConnectionPlugin'
     },
     plugins: [
-        vue()
+        vue(),
+        commonjs()
     ]
 }
