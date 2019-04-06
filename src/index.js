@@ -1,14 +1,14 @@
-import Vue from 'vue';
 import * as ConnectionPlugin from 'rete-connection-plugin';
 import Pins from './Pins.vue';
+import Vue from 'vue';
 
-function install(editor, params) {
+function install(editor) {
 
     editor.on('connectionpath', data => {
         const { connection } = data;
         const [x1, y1, x2, y2] = data.points;
         const pins = connection && connection.data.pins ? connection.data.pins : [];
-        const p = [[x1, y1], ...pins.map(p => [p.x, p.y]), [x2, y2]];
+        const p = [[x1, y1], ...pins.map(({ x, y }) => [x, y]), [x2, y2]];
 
         let d = '';
 
