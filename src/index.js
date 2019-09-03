@@ -52,5 +52,6 @@ function install(editor) {
 }
 
 export default {
+    name: 'connection-reroute',
     install
 }
