@@ -2,19 +2,7 @@ import * as ConnectionPlugin from 'rete-connection-plugin';
 import Pins from './Pins.vue';
 import Vue from 'vue';
 
-function install(editor, { useStraightLine = false }) {
-    this.metaOn = false
-    editor.on('keydown', (eve) => {
-        if (eve.key === "Meta" || eve.key === "Control") {
-            this.metaOn = true
-        }
-    })
-    editor.on('keyup', (eve) => {
-        if (eve.key === "Meta" || eve.key === "Control") {
-            this.metaOn = false
-        }
-    })
-
+function install(editor) {
     editor.on('connectionpath', data => {
         const { connection } = data;
         const [x1, y1, x2, y2] = data.points;
@@ -22,9 +10,9 @@ function install(editor, { useStraightLine = false }) {
         const p = [[x1, y1], ...pins.map(({ x, y }) => [x, y]), [x2, y2]];
 
         let d = '';
-        let pathGenFunc = useStraightLine ? strightLine : ConnectionPlugin.defaultPath
+
         for (var i = 1; i < p.length; i++)
-            d += ' ' + pathGenFunc([...p[i - 1], ...p[i]], 0.4)
+            d += ' ' + ConnectionPlugin.defaultPath([...p[i - 1], ...p[i]], 0.4)
 
 
         data.d = d;
@@ -35,19 +23,16 @@ function install(editor, { useStraightLine = false }) {
 
         if (!path) throw new Error('<path> not found');
 
-        path.addEventListener('click', (event) => {
-            if (this.metaOn) {
-                const { mouse } = editor.view.area;
-                const pin = { ...mouse };
-                const [x1, y1, x2, y2] = editor.view.connections.get(connection).getPoints();
-                const p = [{ x: x1, y: y1 }, ...pins, { x: x2, y: y2 }];
-                let idx = findRightIndex(pin, p)
-                pins.splice(idx, 0, pin)
+        path.addEventListener('click', () => {
+            const { mouse } = editor.view.area;
+            const pin = { ...mouse };
+            const [x1, y1, x2, y2] = editor.view.connections.get(connection).getPoints();
+            const p = [{ x: x1, y: y1 }, ...pins, { x: x2, y: y2 }];
+            let idx = findRightIndex(pin, p)
+            pins.splice(idx, 0, pin)
 
-                app.$children[0].$forceUpdate();
-                editor.view.connections.get(connection).update();
-            }
-
+            app.$children[0].$forceUpdate();
+            editor.view.connections.get(connection).update();
         });
 
         const vueContainer = document.createElement('div');
@@ -94,7 +79,6 @@ function install(editor, { useStraightLine = false }) {
         let minIdx = -1;
         let minDist = Infinity
         for (let index = 0; index < line.length - 1; index++) {
-            console.log(point, line[index], line[index + 1], pointInBound(point, line[index], line[index + 1]))
             if (pointInBound(point, line[index], line[index + 1])) {
                 let dist = distanceToLine(point, line[index], line[index + 1])
                 if (dist < minDist) {
@@ -105,10 +89,8 @@ function install(editor, { useStraightLine = false }) {
 
         }
         if (minIdx === -1) {
-            console.log("Use backup plan")
             return findRightIndexBack(point, line)
         }
-        console.log(minIdx)
         return minIdx
     }
     /**
@@ -149,10 +131,6 @@ function install(editor, { useStraightLine = false }) {
             - p2.y * p1.x
         let bot = Math.pow((p2.y - p1.y), 2) + Math.pow((p2.x - p1.x), 2)
         return Math.abs(top) / Math.sqrt(bot)
-    }
-    function strightLine(points) {
-        const [x1, y1, x2, y2] = points;
-        return `M ${x1} ${y1} L ${x2} ${y2}`;
     }
 }
 
