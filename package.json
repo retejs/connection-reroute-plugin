@@ -10,6 +10,13 @@
     "prepublishOnly": "npm run build"
   },
   "author": "Vitaliy Stoliarov",
+  "contributors": [
+    {
+      "name": "xVan Turing",
+      "email": "xVanTuring@outlook.com",
+      "url": "http://xvanturing.ml/"
+    }
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
