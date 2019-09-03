@@ -1,6 +1,6 @@
 {
   "name": "rete-connection-reroute-plugin",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "",
   "main": "build/connection-reroute-plugin.common.js",
   "module": "build/connection-reroute-plugin.esm.js",
