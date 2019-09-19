@@ -12,7 +12,7 @@ function install(editor) {
 
         let d = '';
 
-        for (var i = 1; i < p.length; i++) {
+        for (var i = 1; i < points.length; i++) {
             d += ' ' + ConnectionPlugin.defaultPath([...points[i - 1], ...points[i]], 0.4);
         }
 
