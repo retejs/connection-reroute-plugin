@@ -1,22 +1,21 @@
 import Vue from 'vue';
-import * as ConnectionPlugin from 'rete-connection-plugin';
+import * as d3 from 'd3-shape';
 import Pins from './Pins.vue';
-import { findRightIndex } from './utils';
+import { findRightIndex, alignEndsHorizontally } from './utils';
 
-function install(editor) {
+function install(editor, { curve = d3.curveCatmullRom.alpha(1), curvature = 0.05 }) {
     editor.on('connectionpath', data => {
         const { connection } = data;
         const [x1, y1, x2, y2] = data.points;
         const pins = connection && connection.data.pins ? connection.data.pins : [];
         const points = [[x1, y1], ...pins.map(({ x, y }) => [x, y]), [x2, y2]];
+        const transformedPoints = alignEndsHorizontally(points, curvature);
 
-        let d = '';
-
-        for (var i = 1; i < points.length; i++) {
-            d += ' ' + ConnectionPlugin.defaultPath([...points[i - 1], ...points[i]], 0.4);
-        }
-
-        data.d = d;
+        data.d = d3.line()
+            .x(d => d[0])
+            .y(d => d[1])
+            .curve(curve)
+            (transformedPoints)
     });
     editor.on('renderconnection', ({ el, connection }) => {
         const path = el.querySelector('.connection path');

@@ -75,3 +75,18 @@ export function distanceToLine(p0, p1, p2) {
     let bot = Math.pow((p2.y - p1.y), 2) + Math.pow((p2.x - p1.x), 2)
     return Math.abs(top) / Math.sqrt(bot)
 }
+
+export function alignEndsHorizontally(points, curvature) {
+    const p1 = points[0];
+    const p2 = points[1];
+    const p3 = points[points.length - 2];
+    const p4 = points[points.length - 1];
+    const hx1 = p1[0] + Math.abs(p2[0] - p1[0]) * curvature;
+    const hx2 = p4[0] - Math.abs(p4[0] - p3[0]) * curvature;
+
+    points = [...points];
+    points.splice(1, 0, [hx1, p1[1]]);
+    points.splice(points.length - 1, 0, [hx2, p4[1]]);
+
+    return points;
+}
