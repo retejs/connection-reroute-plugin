@@ -1,36 +1,32 @@
 {
   "name": "rete-connection-reroute-plugin",
-  "version": "0.4.0",
+  "version": "2.0.0-beta.1",
   "description": "",
   "main": "build/connection-reroute-plugin.common.js",
   "module": "build/connection-reroute-plugin.esm.js",
+  "types": "types",
   "scripts": {
-    "build": "rete --build rete.config.js",
-    "build:dev": "rete --build rete.config.js --watch",
-    "prepublishOnly": "npm run build"
+    "build": "rete build -c rete.config.ts",
+    "build:dev": "rete build -c rete.config.ts --watch",
+    "prepublishOnly": "npm run build",
+    "lint": "rete lint"
   },
   "author": "Vitaliy Stoliarov",
-  "contributors": [
-    {
-      "name": "xVan Turing",
-      "email": "xVanTuring@outlook.com",
-      "url": "http://xvanturing.ml/"
-    }
-  ],
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/retejs/connection-reroute-plugin.git"
   },
-  "dependencies": {
-    "d3-shape": "^1.3.5",
-    "vue": "2.6.10"
+  "peerDependencies": {
+    "rete": "file:../rete/rete-2.0.0-beta.1.tgz",
+    "rete-area-plugin": "file:../area-plugin/rete-area-plugin-0.2.1.tgz",
+    "rete-render-utils": "file:../render-utils/rete-render-utils-0.1.0.tgz"
   },
   "devDependencies": {
-    "node-sass": "^4.9.3",
-    "pug": "^2.0.3",
-    "rete-cli": "^0.6.0",
-    "rollup-plugin-vue": "4.7.2",
-    "vue-template-compiler": "2.6.10"
+    "rete": "file:../rete/rete-2.0.0-beta.1.tgz",
+    "rete-area-plugin": "file:../area-plugin/rete-area-plugin-0.2.1.tgz",
+    "rete-cli": "1.0.0-beta.16",
+    "rete-render-utils": "file:../render-utils/rete-render-utils-0.1.0.tgz",
+    "typescript": "4.8.4"
   }
 }
