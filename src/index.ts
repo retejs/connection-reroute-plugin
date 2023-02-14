@@ -24,148 +24,147 @@ export type RerouteProduces =
     | { type: 'pinunselected', data: { id: string }}
 
 export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope<RerouteProduces, [RenderProduces<Schemes>, ...Area2DInherited<Schemes, Substitute<K>>]> {
-    pinContainers = new Map<ConnectionId, { element: HTMLElement }>()
-    pins = getPinsStorage()
+  pinContainers = new Map<ConnectionId, { element: HTMLElement }>()
+  pins = getPinsStorage()
 
-    constructor() {
-        super('connection-reroute')
-    }
+  constructor() {
+    super('connection-reroute')
+  }
 
-    setParent(scope: Scope<RenderProduces<Schemes>, Area2DInherited<Schemes, Substitute<K>>>): void {
-        super.setParent(scope)
+  setParent(scope: Scope<RenderProduces<Schemes>, Area2DInherited<Schemes, Substitute<K>>>): void {
+    super.setParent(scope)
 
-        // eslint-disable-next-line max-statements
-        scope.addPipe(context => {
-            if (!context || typeof context !== 'object' || !('type' in context)) return context
+    // eslint-disable-next-line max-statements, complexity
+    scope.addPipe(context => {
+      if (!context || typeof context !== 'object' || !('type' in context)) return context
 
-            if (context.type === 'rendered' && context.data.type === 'connection') {
-                const { element, payload: { id } } = context.data
+      if (context.type === 'rendered' && context.data.type === 'connection') {
+        const { element, payload: { id } } = context.data
 
-                if (!this.pinContainers.has(id)) {
-                    const pinContainer = document.createElement('div')
+        if (!this.pinContainers.has(id)) {
+          const pinContainer = document.createElement('div')
 
-                    this.pinContainers.set(id, { element: pinContainer })
+          this.pinContainers.set(id, { element: pinContainer })
 
-                    element.appendChild(pinContainer)
-                }
-            }
-            if (context.type === 'connectionpath') {
-                const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
-                const { payload: { id } } = context.data
-                const container = this.pinContainers.get(id)
-                const start = context.data.points[0]
-                const end = context.data.points[context.data.points.length - 1]
+          element.appendChild(pinContainer)
+        }
+      }
+      if (context.type === 'connectionpath') {
+        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+        const { payload: { id } } = context.data
+        const container = this.pinContainers.get(id)
+        const start = context.data.points[0]
+        const end = context.data.points[context.data.points.length - 1]
 
-                const pins = this.pins.getPins(id)
+        const pins = this.pins.getPins(id)
 
-                if (container) {
-                    area.emit({ type: 'render', data: {
-                        type: 'reroute-pins',
-                        element: container.element,
-                        data: { id, pins }
-                    } })
-                }
+        if (container) {
+          area.emit({ type: 'render', data: {
+            type: 'reroute-pins',
+            element: container.element,
+            data: { id, pins }
+          } })
+        }
 
-                const points = [start, ...pins.map(item => item.position), end]
-                let path = ''
+        const points = [start, ...pins.map(item => item.position), end]
+        let path = ''
 
-                for (let i = 1; i < points.length; i++) {
-                    const a = points[i - 1]
-                    const b = points[i]
+        for (let i = 1; i < points.length; i++) {
+          const a = points[i - 1]
+          const b = points[i]
 
-                    path += classicConnectionPath([a, b], 0.3) + ' '
-                }
+          path += classicConnectionPath([a, b], 0.3) + ' '
+        }
 
-                return {
-                    ...context,
-                    data: {
-                        ...context.data,
-                        points,
-                        path
-                    }
-                }
-            }
-            if (context.type === 'pointerdown') {
-                const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
-                const path = context.data.event.composedPath()
-                const views = Array.from(area.connectionViews.entries())
-                const pickedConnection = views.find(([_, view]) => path.includes(view))
+        return {
+          ...context,
+          data: {
+            ...context.data,
+            points,
+            path
+          }
+        }
+      }
+      if (context.type === 'pointerdown') {
+        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+        const path = context.data.event.composedPath()
+        const views = Array.from(area.connectionViews.entries())
+        const pickedConnection = views.find(([, view]) => path.includes(view))
 
-                if (pickedConnection) {
-                    const [id, view] = pickedConnection
-                    const svgPath = view.querySelector('path')
-                    const pins = this.pins.getPins(id)
+        if (pickedConnection) {
+          const [id, view] = pickedConnection
+          const svgPath = view.querySelector('path')
+          const pins = this.pins.getPins(id)
 
-                    if (svgPath && pins) {
-                        const position = { ...area.area.pointer }
-                        const start = svgPath.getPointAtLength(0)
-                        const end = svgPath.getPointAtLength(1)
+          if (svgPath && pins) {
+            const position = { ...area.area.pointer }
+            const start = svgPath.getPointAtLength(0)
+            const end = svgPath.getPointAtLength(1)
 
-                        const points: Position[] = [start, ...pins.map(p => p.position), end]
-                        const index = findRightIndex(position, points)
+            const points: Position[] = [start, ...pins.map(p => p.position), end]
+            const index = findRightIndex(position, points)
 
-                        this.add(id, position, index)
-                    }
-                }
+            this.add(id, position, index)
+          }
+        }
+      }
+      return context
+    })
+  }
 
-            }
-            return context
-        })
-    }
+  public add(connectionId: ConnectionId, position: Position, index?: number) {
+    const area = this.parentScope().parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+    const editor = area.parentScope<NodeEditor<Schemes>>(NodeEditor)
+    const pin = { id: getUID(), position }
 
-    public add(connectionId: ConnectionId, position: Position, index?: number) {
-        const area = this.parentScope().parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
-        const editor = area.parentScope<NodeEditor<Schemes>>(NodeEditor)
-        const pin = { id: getUID(), position }
+    this.pins.add(connectionId, pin, index)
+    area.renderConnection(editor.getConnection(connectionId))
+  }
 
-        this.pins.add(connectionId, pin, index)
-        area.renderConnection(editor.getConnection(connectionId))
-    }
+  public async translate(pinId: string, dx: number, dy: number) {
+    const pin = this.pins.getPin(pinId)
 
-    public async translate(pinId: string, dx: number, dy: number) {
-        const pin = this.pins.getPin(pinId)
+    if (!pin) return
+    pin.position = { x: pin.position.x + dx, y: pin.position.y + dy }
+    this.update(pin)
+    await this.emit({ type: 'pintranslated', data: { id: pinId, dx, dy } })
+  }
 
-        if (!pin) return
-        pin.position = { x: pin.position.x + dx, y: pin.position.y + dy }
-        this.update(pin)
-        await this.emit({ type: 'pintranslated', data: { id: pinId, dx, dy } })
-    }
+  public async remove(pinId: string) {
+    const pin = this.pins.getPin(pinId)
 
-    public async remove(pinId: string) {
-        const pin = this.pins.getPin(pinId)
+    if (!pin) return
+    if (pin.selected) await this.unselect(pinId)
+    this.pins.remove(pinId)
+    this.update(pin)
+  }
 
-        if (!pin) return
-        if (pin.selected) await this.unselect(pinId)
-        this.pins.remove(pinId)
-        this.update(pin)
-    }
+  public async select(pinId: string) {
+    const pin = this.pins.getPin(pinId)
 
-    public async select(pinId: string) {
-        const pin = this.pins.getPin(pinId)
+    if (!pin) return
+    if (pin.selected) return
+    pin.selected = true
+    this.update(pin)
+    await this.emit({ type: 'pinselected', data: { id: pinId } })
+  }
 
-        if (!pin) return
-        if (pin.selected) return
-        pin.selected = true
-        this.update(pin)
-        await this.emit({ type: 'pinselected', data: { id: pinId } })
-    }
+  public async unselect(pinId: string) {
+    const pin = this.pins.getPin(pinId)
 
-    public async unselect(pinId: string) {
-        const pin = this.pins.getPin(pinId)
+    if (!pin) return
+    if (!pin.selected) return
+    pin.selected = false
+    this.update(pin)
+    await this.emit({ type: 'pinunselected', data: { id: pinId } })
+  }
 
-        if (!pin) return
-        if (!pin.selected) return
-        pin.selected = false
-        this.update(pin)
-        await this.emit({ type: 'pinunselected', data: { id: pinId } })
-    }
+  public update(pin: string | PinStorageRecord) {
+    const pinRecord = typeof pin === 'object' ? pin : this.pins.getPin(pin)
+    const area = this.parentScope().parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+    const editor = area.parentScope<NodeEditor<Schemes>>(NodeEditor)
 
-    public update(pin: string | PinStorageRecord) {
-        const pinRecord = typeof pin === 'object' ? pin : this.pins.getPin(pin)
-        const area = this.parentScope().parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
-        const editor = area.parentScope<NodeEditor<Schemes>>(NodeEditor)
-
-        if (!pinRecord) return
-        area.renderConnection(editor.getConnection(pinRecord.connectionId))
-    }
+    if (!pinRecord) return
+    area.renderConnection(editor.getConnection(pinRecord.connectionId))
+  }
 }
