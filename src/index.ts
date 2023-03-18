@@ -25,6 +25,7 @@ export type RerouteProduces =
 
 export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope<RerouteProduces, [RenderProduces<Schemes>, ...Area2DInherited<Schemes, Substitute<K>>]> {
   pinContainers = new Map<ConnectionId, { element: HTMLElement }>()
+  pinParents = new Map<HTMLElement, { id: ConnectionId, pinContainer: HTMLElement }>()
   pins = getPinsStorage()
 
   constructor() {
@@ -39,14 +40,38 @@ export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope
       if (!context || typeof context !== 'object' || !('type' in context)) return context
 
       if (context.type === 'rendered' && context.data.type === 'connection') {
+        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
         const { element, payload: { id } } = context.data
 
-        if (!this.pinContainers.has(id)) {
+        if (!this.pinParents.has(element)) {
           const pinContainer = document.createElement('div')
 
+          pinContainer.dataset['type'] = 'pin-container'
           this.pinContainers.set(id, { element: pinContainer })
+          this.pinParents.set(element, { id, pinContainer })
+          area.area.content.add(pinContainer)
+          area.area.content.reorder(pinContainer, element.nextElementSibling)
+        }
+      }
+      if (context.type === 'unmount') {
+        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+        const { element } = context.data
+        const record = this.pinParents.get(element)
 
-          element.appendChild(pinContainer)
+        if (record) {
+          this.pinParents.delete(element)
+          this.pinContainers.delete(record.id)
+          area.emit({ type: 'unmount', data: { element: record.pinContainer } })
+          area.area.content.remove(record.pinContainer)
+        }
+      }
+      if (context.type === 'reordered') {
+        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+        const { element } = context.data
+        const record = this.pinParents.get(element)
+
+        if (record) {
+          area.area.content.reorder(record.pinContainer, element.nextElementSibling)
         }
       }
       if (context.type === 'connectionpath') {
