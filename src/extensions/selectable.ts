@@ -13,7 +13,6 @@ export function selectablePins<S extends BaseSchemes, K>(reroutePlugin: RerouteP
     if (context.type === 'pinselected') {
       const { id } = context.data
 
-      if (!accumulating.active()) selector.unselectAll()
       selector.add({
         id,
         label: 'pin',
