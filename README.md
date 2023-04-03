@@ -1,21 +1,24 @@
-Connection Reroute
+Rete.js Connection reroute plugin
 ====
-#### Rete.js plugin
+[![Made in Ukraine](https://img.shields.io/badge/made_in-ukraine-ffd700.svg?labelColor=0057b7)](https://stand-with-ukraine.pp.ua)
+[![Discord](https://img.shields.io/discord/1081223198055604244?color=%237289da&label=Discord)](https://discord.gg/cxSFkPZdsV)
 
-```js
-import ConnectionReroutePlugin from 'rete-connection-reroute-plugin';
+**Rete.js plugin**
 
-editor.use(ConnectionReroutePlugin);
-```
+## Key features
 
-Customize:
+- **Change connection routing**: provides the ability to route connections using pins
+- **Extensions**:
+  - **Selectable**: enables the selection of pins
 
-```js
-import * as d3 from 'd3-shape';
+## Getting Started
 
-editor.use(ConnectionReroutePlugin, {
-    // defaut values
-    curve: d3.curveCatmullRom.alpha(1), 
-    curvature: 0.05 
-});
-```
+Please refer to the [guide](https://retejs.org/docs/guides/reroute) and [example](https://retejs.org/examples/reroute) using this plugin
+
+## Contribution
+
+Please refer to the [Contribution](https://retejs.org/docs/contribution) guide
+
+## License
+
+[MIT](https://github.com/retejs/connection-reroute-plugin/blob/master/LICENSE)
