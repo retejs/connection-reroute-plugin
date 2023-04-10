@@ -3,10 +3,10 @@ import { ReteOptions } from 'rete-cli'
 
 export default <ReteOptions>{
   input: 'src/index.ts',
-  name: 'ConnectionReroutePlugin',
+  name: 'ReteConnectionReroutePlugin',
   globals: {
     'rete': 'Rete',
-    'rete-area-plugin': 'AreaPlugin',
-    'rete-render-utils': 'RenderUtils'
+    'rete-area-plugin': 'ReteAreaPlugin',
+    'rete-render-utils': 'ReteRenderUtils'
   }
 }
