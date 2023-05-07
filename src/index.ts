@@ -1,29 +1,25 @@
-import { BaseSchemes, CanAssignSignal, ConnectionId, getUID, Scope } from 'rete'
-import { Area2DInherited, AreaPlugin, RenderData } from 'rete-area-plugin'
+import { BaseSchemes, ConnectionId, getUID, Scope } from 'rete'
+import { Area2D, AreaPlugin, RenderSignal } from 'rete-area-plugin'
 import { classicConnectionPath } from 'rete-render-utils'
 
 import { getPinsStorage, PinStorageRecord } from './storage'
-import { PinsRenderData, Position } from './types'
+import { PinData, Position } from './types'
 import { findRightIndex } from './utils'
 
 export * as RerouteExtensions from './extensions'
 
-export type RerouteExtra<Schemes extends BaseSchemes> =
-    | { type: 'render', data: RenderData<Schemes> | PinsRenderData }
-    | { type: 'rendered', data: RenderData<Schemes> | PinsRenderData }
+export type RerouteExtra =
+  RenderSignal<'reroute-pins', { data: PinData }>
 
-type RenderProduces<Schemes extends BaseSchemes> =
+type Requires<Schemes extends BaseSchemes> =
     | { type: 'connectionpath', data: { payload: Schemes['Connection'], path?: string, points: Position[] } }
-
-type IsCompatible<K> = Extract<K, { type: 'render' }> extends { type: 'render', data: infer P } ? CanAssignSignal<P, PinsRenderData> : false // TODO should add type: 'render' ??
-type Substitute<K> = IsCompatible<K> extends true ? K : RerouteExtra<BaseSchemes>
 
 export type RerouteProduces =
     | { type: 'pintranslated', data: { id: string, dx: number, dy: number }}
     | { type: 'pinselected', data: { id: string }}
     | { type: 'pinunselected', data: { id: string }}
 
-export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope<RerouteProduces, [RenderProduces<Schemes>, ...Area2DInherited<Schemes, Substitute<K>>]> {
+export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<RerouteProduces, [Requires<Schemes>, Area2D<Schemes> | RerouteExtra]> {
   pinContainers = new Map<ConnectionId, { element: HTMLElement }>()
   pinParents = new Map<HTMLElement, { id: ConnectionId, pinContainer: HTMLElement }>()
   pins = getPinsStorage()
@@ -32,7 +28,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope
     super('connection-reroute')
   }
 
-  setParent(scope: Scope<RenderProduces<Schemes>, Area2DInherited<Schemes, Substitute<K>>>): void {
+  setParent(scope: Scope<Requires<Schemes>, [Area2D<Schemes> | RerouteExtra]>): void {
     super.setParent(scope)
 
     // eslint-disable-next-line max-statements, complexity
@@ -40,7 +36,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope
       if (!context || typeof context !== 'object' || !('type' in context)) return context
 
       if (context.type === 'rendered' && context.data.type === 'connection') {
-        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
         const { element, payload: { id } } = context.data
 
         if (!this.pinParents.has(element)) {
@@ -54,7 +50,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope
         }
       }
       if (context.type === 'unmount') {
-        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
         const { element } = context.data
         const record = this.pinParents.get(element)
 
@@ -66,7 +62,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope
         }
       }
       if (context.type === 'reordered') {
-        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
         const { element } = context.data
         const record = this.pinParents.get(element)
 
@@ -75,7 +71,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope
         }
       }
       if (context.type === 'connectionpath') {
-        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
         const { payload: { id } } = context.data
         const container = this.pinContainers.get(id)
         const start = context.data.points[0]
@@ -111,7 +107,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope
         }
       }
       if (context.type === 'pointerdown') {
-        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
         const path = context.data.event.composedPath()
         const views = Array.from(area.connectionViews.entries())
         const pickedConnection = views.find(([, view]) => path.includes(view.element))
@@ -138,7 +134,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope
   }
 
   public add(connectionId: ConnectionId, position: Position, index?: number) {
-    const area = this.parentScope().parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+    const area = this.parentScope().parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
     const pin = { id: getUID(), position }
 
     this.pins.add(connectionId, pin, index)
@@ -185,7 +181,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes, K = never> extends Scope
 
   public update(pin: string | PinStorageRecord) {
     const pinRecord = typeof pin === 'object' ? pin : this.pins.getPin(pin)
-    const area = this.parentScope().parentScope<AreaPlugin<Schemes, RerouteExtra<Schemes>>>(AreaPlugin)
+    const area = this.parentScope().parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
 
     if (!pinRecord) return
     area.update('connection', pinRecord.connectionId)

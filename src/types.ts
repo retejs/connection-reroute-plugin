@@ -11,8 +11,3 @@ export type PinData = {
   id: ConnectionId
   pins: Pin[]
 }
-export type PinsRenderData = {
-  element: HTMLElement
-  type: 'reroute-pins'
-  data: PinData
-}

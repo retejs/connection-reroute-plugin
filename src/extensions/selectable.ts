@@ -5,7 +5,7 @@ type Selector = ReturnType<typeof AreaExtensions.selector>
 
 import { ReroutePlugin } from '..'
 
-export function selectablePins<S extends BaseSchemes, K>(reroutePlugin: ReroutePlugin<S, K>, selector: Selector, accumulating: { active(): boolean }) {
+export function selectablePins<S extends BaseSchemes>(reroutePlugin: ReroutePlugin<S>, selector: Selector, accumulating: { active(): boolean }) {
   // eslint-disable-next-line max-statements
   reroutePlugin.addPipe(context => {
     if (!('type' in context)) return context
