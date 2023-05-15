@@ -1,5 +1,5 @@
 import { BaseSchemes, ConnectionId, getUID, Scope } from 'rete'
-import { Area2D, AreaPlugin, RenderSignal } from 'rete-area-plugin'
+import { BaseArea, BaseAreaPlugin, RenderSignal } from 'rete-area-plugin'
 import { classicConnectionPath } from 'rete-render-utils'
 
 import { getPinsStorage, PinStorageRecord } from './storage'
@@ -9,17 +9,18 @@ import { findRightIndex } from './utils'
 export * as RerouteExtensions from './extensions'
 
 export type RerouteExtra =
-  RenderSignal<'reroute-pins', { data: PinData }>
+  | RenderSignal<'reroute-pins', { data: PinData }>
+  | { type: 'unmount', data: { element: HTMLElement } }
 
 type Requires<Schemes extends BaseSchemes> =
-    | { type: 'connectionpath', data: { payload: Schemes['Connection'], path?: string, points: Position[] } }
+  | { type: 'connectionpath', data: { payload: Schemes['Connection'], path?: string, points: Position[] } }
 
 export type RerouteProduces =
-    | { type: 'pintranslated', data: { id: string, dx: number, dy: number }}
-    | { type: 'pinselected', data: { id: string }}
-    | { type: 'pinunselected', data: { id: string }}
+  | { type: 'pintranslated', data: { id: string, dx: number, dy: number } }
+  | { type: 'pinselected', data: { id: string } }
+  | { type: 'pinunselected', data: { id: string } }
 
-export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<RerouteProduces, [Requires<Schemes>, Area2D<Schemes> | RerouteExtra]> {
+export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<RerouteProduces, [Requires<Schemes>, BaseArea<Schemes> | RerouteExtra]> {
   pinContainers = new Map<ConnectionId, { element: HTMLElement }>()
   pinParents = new Map<HTMLElement, { id: ConnectionId, pinContainer: HTMLElement }>()
   pins = getPinsStorage()
@@ -28,15 +29,16 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
     super('connection-reroute')
   }
 
-  setParent(scope: Scope<Requires<Schemes>, [Area2D<Schemes> | RerouteExtra]>): void {
+  setParent(scope: Scope<Requires<Schemes>, [BaseArea<Schemes> | RerouteExtra]>): void {
     super.setParent(scope)
+    type Base = BaseAreaPlugin<Schemes, BaseArea<Schemes> | RerouteExtra>
 
     // eslint-disable-next-line max-statements, complexity
     scope.addPipe(context => {
       if (!context || typeof context !== 'object' || !('type' in context)) return context
 
       if (context.type === 'rendered' && context.data.type === 'connection') {
-        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
+        const area = scope.parentScope<Base>(BaseAreaPlugin)
         const { element, payload: { id } } = context.data
 
         if (!this.pinParents.has(element)) {
@@ -50,7 +52,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
         }
       }
       if (context.type === 'unmount') {
-        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
+        const area = scope.parentScope<Base>(BaseAreaPlugin)
         const { element } = context.data
         const record = this.pinParents.get(element)
 
@@ -62,7 +64,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
         }
       }
       if (context.type === 'reordered') {
-        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
+        const area = scope.parentScope<Base>(BaseAreaPlugin)
         const { element } = context.data
         const record = this.pinParents.get(element)
 
@@ -71,7 +73,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
         }
       }
       if (context.type === 'connectionpath') {
-        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
+        const area = scope.parentScope<Base>(BaseAreaPlugin)
         const { payload: { id } } = context.data
         const container = this.pinContainers.get(id)
         const start = context.data.points[0]
@@ -80,11 +82,13 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
         const pins = this.pins.getPins(id)
 
         if (container) {
-          area.emit({ type: 'render', data: {
-            type: 'reroute-pins',
-            element: container.element,
-            data: { id, pins }
-          } })
+          area.emit({
+            type: 'render', data: {
+              type: 'reroute-pins',
+              element: container.element,
+              data: { id, pins }
+            }
+          })
         }
 
         const points = [start, ...pins.map(item => item.position), end]
@@ -107,7 +111,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
         }
       }
       if (context.type === 'pointerdown') {
-        const area = scope.parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
+        const area = scope.parentScope<Base>(BaseAreaPlugin)
         const path = context.data.event.composedPath()
         const views = Array.from(area.connectionViews.entries())
         const pickedConnection = views.find(([, view]) => path.includes(view.element))
@@ -134,7 +138,9 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
   }
 
   public add(connectionId: ConnectionId, position: Position, index?: number) {
-    const area = this.parentScope().parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
+    type Base = BaseAreaPlugin<Schemes, BaseArea<Schemes> | RerouteExtra>
+
+    const area = this.parentScope().parentScope<Base>(BaseAreaPlugin)
     const pin = { id: getUID(), position }
 
     this.pins.add(connectionId, pin, index)
@@ -180,8 +186,10 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
   }
 
   public update(pin: string | PinStorageRecord) {
+    type Base = BaseAreaPlugin<Schemes, BaseArea<Schemes> | RerouteExtra>
+
     const pinRecord = typeof pin === 'object' ? pin : this.pins.getPin(pin)
-    const area = this.parentScope().parentScope<AreaPlugin<Schemes, RerouteExtra>>(AreaPlugin)
+    const area = this.parentScope().parentScope<Base>(BaseAreaPlugin)
 
     if (!pinRecord) return
     area.update('connection', pinRecord.connectionId)
