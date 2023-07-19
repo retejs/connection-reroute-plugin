@@ -8,6 +8,9 @@ import { findRightIndex } from './utils'
 
 export * as RerouteExtensions from './extensions'
 
+/**
+ * Signal types consumed by the plugin
+ */
 export type RerouteExtra =
   | RenderSignal<'reroute-pins', { data: PinData }>
   | { type: 'unmount', data: { element: HTMLElement } }
@@ -15,11 +18,27 @@ export type RerouteExtra =
 type Requires<Schemes extends BaseSchemes> =
   | { type: 'connectionpath', data: { payload: Schemes['Connection'], path?: string, points: Position[] } }
 
+/**
+ * Signal types produced by the plugin
+ * @priority 10
+ */
 export type RerouteProduces =
   | { type: 'pintranslated', data: { id: string, dx: number, dy: number } }
   | { type: 'pinselected', data: { id: string } }
   | { type: 'pinunselected', data: { id: string } }
 
+/**
+ * Reroute plugin
+ * @listens rendered
+ * @listens unmount
+ * @listens reordered
+ * @listens connectionpath
+ * @listens pointerdown
+ * @emits pintranslated
+ * @emits pinselected
+ * @emits pinunselected
+ * @priority 9
+ */
 export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<RerouteProduces, [Requires<Schemes>, BaseArea<Schemes> | RerouteExtra]> {
   pinContainers = new Map<ConnectionId, { element: HTMLElement }>()
   pinParents = new Map<HTMLElement, { id: ConnectionId, pinContainer: HTMLElement }>()
@@ -137,6 +156,12 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
     })
   }
 
+  /**
+   * Add a new pin to the connection
+   * @param connectionId Connection id
+   * @param position Pin position
+   * @param index Pin index, if not specified, the pin will be added to the end
+   */
   public add(connectionId: ConnectionId, position: Position, index?: number) {
     type Base = BaseAreaPlugin<Schemes, BaseArea<Schemes> | RerouteExtra>
 
@@ -147,6 +172,12 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
     area.update('connection', connectionId)
   }
 
+  /**
+   * Translate pin
+   * @param pinId Pin id
+   * @param dx Delta x
+   * @param dy Delta y
+   */
   public async translate(pinId: string, dx: number, dy: number) {
     const pin = this.pins.getPin(pinId)
 
@@ -156,6 +187,10 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
     await this.emit({ type: 'pintranslated', data: { id: pinId, dx, dy } })
   }
 
+  /**
+   * Remove pin
+   * @param pinId Pin id
+   */
   public async remove(pinId: string) {
     const pin = this.pins.getPin(pinId)
 
@@ -165,6 +200,10 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
     this.update(pin)
   }
 
+  /**
+   * Select pin
+   * @param pinId Pin id
+   */
   public async select(pinId: string) {
     const pin = this.pins.getPin(pinId)
 
@@ -175,6 +214,10 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
     await this.emit({ type: 'pinselected', data: { id: pinId } })
   }
 
+  /**
+   * Unselect pin
+   * @param pinId Pin id
+   */
   public async unselect(pinId: string) {
     const pin = this.pins.getPin(pinId)
 
@@ -185,6 +228,10 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
     await this.emit({ type: 'pinunselected', data: { id: pinId } })
   }
 
+  /**
+   * Update connection for the pin
+   * @param pin Pin id or pin record
+   */
   public update(pin: string | PinStorageRecord) {
     type Base = BaseAreaPlugin<Schemes, BaseArea<Schemes> | RerouteExtra>
 
