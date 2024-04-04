@@ -1,0 +1,34 @@
+{
+  "name": "rete-connection-reroute-plugin",
+  "version": "2.0.1",
+  "description": "",
+  "author": "Vitaliy Stoliarov",
+  "license": "MIT",
+  "keywords": [
+    "plugin",
+    "rete",
+    "Rete.js"
+  ],
+  "homepage": "https://retejs.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/retejs/connection-reroute-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/retejs/connection-reroute-plugin/issues"
+  },
+  "peerDependencies": {
+    "rete": "^2.0.1",
+    "rete-area-plugin": "^2.0.0",
+    "rete-render-utils": "^2.0.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.21.0"
+  },
+  "module": "rete-connection-reroute-plugin.esm.js",
+  "main": "rete-connection-reroute-plugin.common.js",
+  "jsdelivr": "rete-connection-reroute-plugin.min.js",
+  "unpkg": "rete-connection-reroute-plugin.min.js",
+  "types": "_types/index.d.ts",
+  "typings": "_types/index.d.ts"
+}
