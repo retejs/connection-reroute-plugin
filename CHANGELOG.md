@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/retejs/connection-reroute-plugin/compare/v2.0.1...v2.0.2) (2024-08-12)
+
+
+### Bug Fixes
+
+* support shadow dom on pointerdown event ([47123b4](https://github.com/retejs/connection-reroute-plugin/commit/47123b43b46275d1c0cfc3b683bdf3ef2316e2f7))
+
 ## [2.0.1](https://github.com/retejs/connection-reroute-plugin/compare/v2.0.0...v2.0.1) (2024-01-27)
 
 
