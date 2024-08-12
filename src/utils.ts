@@ -103,3 +103,33 @@ export function alignEndsHorizontally(points: [number, number][], curvature: num
 
   return points
 }
+
+type Root = Element | DocumentFragment
+
+/* eslint-disable no-undef */
+type TagMap = HTMLElementTagNameMap
+type SVGMap = SVGElementTagNameMap
+/* eslint-enable no-undef */
+
+export function deepQuerySelector<K extends keyof TagMap>(root: Root, selectors: K): TagMap[K] | null
+export function deepQuerySelector<K extends keyof SVGMap>(root: Root, selectors: K): SVGMap[K] | null
+export function deepQuerySelector<E extends Element = Element>(root: Root, selectors: string): E | null
+export function deepQuerySelector(root: Root, selector: string): Element | null {
+  const element = root.querySelector(selector)
+
+  if (element) return element
+
+  const childNodes = root.querySelectorAll('*')
+
+  for (let i = 0; i < childNodes.length; i++) {
+    const shadowRoot = (childNodes[i] as Element).shadowRoot
+
+    if (shadowRoot) {
+      const found = deepQuerySelector(shadowRoot, selector)
+
+      if (found) return found
+    }
+  }
+
+  return null
+}

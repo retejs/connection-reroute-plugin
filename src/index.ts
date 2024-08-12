@@ -4,7 +4,7 @@ import { classicConnectionPath } from 'rete-render-utils'
 
 import { getPinsStorage, PinStorageRecord } from './storage'
 import { PinData, Position } from './types'
-import { findRightIndex } from './utils'
+import { deepQuerySelector, findRightIndex } from './utils'
 
 export * as RerouteExtensions from './extensions'
 
@@ -137,7 +137,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
 
         if (pickedConnection) {
           const [id, view] = pickedConnection
-          const svgPath = view.element.querySelector('path')
+          const svgPath = deepQuerySelector(view.element, 'path')
           const pins = this.pins.getPins(id)
 
           if (svgPath && pins) {
