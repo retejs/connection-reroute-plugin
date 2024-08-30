@@ -13,8 +13,10 @@ export function getPinsStorage() {
       if (pins.has(pin.id)) throw new Error('already exists')
       const data = { ...pin, connectionId }
       const list = [...connectionPins.get(connectionId) || []]
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const _index = typeof index === 'number' ? index : list.length
+
+      const _index = typeof index === 'number'
+        ? index
+        : list.length
 
       list.splice(_index, 0, data)
       connectionPins.set(connectionId, list)

@@ -15,7 +15,6 @@ import { ReroutePlugin } from '..'
  * @listens pintranslated
  */
 export function selectablePins<S extends BaseSchemes>(reroutePlugin: ReroutePlugin<S>, selector: Selector, accumulating: { active(): boolean }) {
-  // eslint-disable-next-line max-statements
   reroutePlugin.addPipe(context => {
     if (!('type' in context)) return context
 
@@ -26,10 +25,10 @@ export function selectablePins<S extends BaseSchemes>(reroutePlugin: ReroutePlug
         id,
         label: 'pin',
         translate(dx, dy) {
-          reroutePlugin.translate(id, dx, dy)
+          void reroutePlugin.translate(id, dx, dy)
         },
         unselect() {
-          reroutePlugin.unselect(id)
+          void reroutePlugin.unselect(id)
         }
       }, accumulating.active())
       selector.pick({ id, label: 'pin' })

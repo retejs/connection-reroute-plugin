@@ -36,7 +36,6 @@ export function distance(point0: Position, point1: Position) {
   return Math.sqrt(Math.pow(point1.x - point0.x, 2) + Math.pow(point1.y - point0.y, 2))
 }
 
-// eslint-disable-next-line max-statements
 export function findRightIndex(point: Position, line: Position[] = []) {
   let minIdx = -1
   let minDist = Infinity
@@ -57,7 +56,7 @@ export function findRightIndex(point: Position, line: Position[] = []) {
   return minIdx
 }
 
-// eslint-disable-next-line max-statements, complexity
+// eslint-disable-next-line complexity
 export function pointInBound(p0: Position, p1: Position, p2: Position) {
   const { x: x1, y: y1 } = p1
   const { x: x2, y: y2 } = p2
@@ -81,10 +80,10 @@ export function pointInBound(p0: Position, p1: Position, p2: Position) {
 
 export function distanceToLine(p0: Position, p1: Position, p2: Position) {
   const top = (p2.y - p1.y) * p0.x
-        - (p2.x - p1.x) * p0.y
-        + p2.x * p1.y
-        - p2.y * p1.x
-  const bot = Math.pow((p2.y - p1.y), 2) + Math.pow((p2.x - p1.x), 2)
+    - (p2.x - p1.x) * p0.y
+    + p2.x * p1.y
+    - p2.y * p1.x
+  const bot = Math.pow(p2.y - p1.y, 2) + Math.pow(p2.x - p1.x, 2)
 
   return Math.abs(top) / Math.sqrt(bot)
 }
@@ -106,10 +105,8 @@ export function alignEndsHorizontally(points: [number, number][], curvature: num
 
 type Root = Element | DocumentFragment
 
-/* eslint-disable no-undef */
 type TagMap = HTMLElementTagNameMap
 type SVGMap = SVGElementTagNameMap
-/* eslint-enable no-undef */
 
 export function deepQuerySelector<K extends keyof TagMap>(root: Root, selectors: K): TagMap[K] | null
 export function deepQuerySelector<K extends keyof SVGMap>(root: Root, selectors: K): SVGMap[K] | null
@@ -119,10 +116,10 @@ export function deepQuerySelector(root: Root, selector: string): Element | null 
 
   if (element) return element
 
-  const childNodes = root.querySelectorAll('*')
+  const childNodes = Array.from(root.querySelectorAll('*'))
 
-  for (let i = 0; i < childNodes.length; i++) {
-    const shadowRoot = (childNodes[i] as Element).shadowRoot
+  for (const node of childNodes) {
+    const shadowRoot = node.shadowRoot
 
     if (shadowRoot) {
       const found = deepQuerySelector(shadowRoot, selector)
