@@ -1,3 +1,10 @@
+## [2.0.3](https://github.com/retejs/connection-reroute-plugin/compare/v2.0.2...v2.0.3) (2024-08-30)
+
+
+### Bug Fixes
+
+* update cli and fix linting errors ([a8c5694](https://github.com/retejs/connection-reroute-plugin/commit/a8c5694c375302acd15124abe76817ca701a2710))
+
 ## [2.0.2](https://github.com/retejs/connection-reroute-plugin/compare/v2.0.1...v2.0.2) (2024-08-12)
 
 
