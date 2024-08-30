@@ -63,7 +63,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
         if (!this.pinParents.has(element)) {
           const pinContainer = document.createElement('div')
 
-          pinContainer.dataset['type'] = 'pin-container'
+          pinContainer.dataset.type = 'pin-container'
           this.pinContainers.set(id, { element: pinContainer })
           this.pinParents.set(element, { id, pinContainer })
           area.area.content.add(pinContainer)
@@ -78,7 +78,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
         if (record) {
           this.pinParents.delete(element)
           this.pinContainers.delete(record.id)
-          area.emit({ type: 'unmount', data: { element: record.pinContainer } })
+          void area.emit({ type: 'unmount', data: { element: record.pinContainer } })
           area.area.content.remove(record.pinContainer)
         }
       }
@@ -101,8 +101,9 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
         const pins = this.pins.getPins(id)
 
         if (container) {
-          area.emit({
-            type: 'render', data: {
+          void area.emit({
+            type: 'render',
+            data: {
               type: 'reroute-pins',
               element: container.element,
               data: { id, pins }
@@ -169,7 +170,7 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
     const pin = { id: getUID(), position }
 
     this.pins.add(connectionId, pin, index)
-    area.update('connection', connectionId)
+    void area.update('connection', connectionId)
   }
 
   /**
@@ -235,10 +236,12 @@ export class ReroutePlugin<Schemes extends BaseSchemes> extends Scope<ReroutePro
   public update(pin: string | PinStorageRecord) {
     type Base = BaseAreaPlugin<Schemes, BaseArea<Schemes> | RerouteExtra>
 
-    const pinRecord = typeof pin === 'object' ? pin : this.pins.getPin(pin)
+    const pinRecord = typeof pin === 'object'
+      ? pin
+      : this.pins.getPin(pin)
     const area = this.parentScope().parentScope<Base>(BaseAreaPlugin)
 
     if (!pinRecord) return
-    area.update('connection', pinRecord.connectionId)
+    void area.update('connection', pinRecord.connectionId)
   }
 }
